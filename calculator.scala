@@ -2,6 +2,22 @@ package com.twitter.univ.calculator
 
 import scala.collection.mutable.Stack
 
+//object CalculatorMain extends Calculator
+
+//class Calculator {
+
+object IntValue {
+    def unapply(s: String) : Option[Int] = {
+    	if (s eq null) return None //reference eq here
+    	try{
+    	Some(s.toInt)
+    	} catch {
+    	case _ : NumberFormatException =>
+    	None//can you extract an Int from the String I gave you?
+        }
+     }
+}
+
 object splitEXP {
 
 	def main(args: Array[String]): Unit = {
@@ -9,23 +25,18 @@ object splitEXP {
 	    //val input = args(0)
 	    args match {
 	    	case Array(i) => 
-	    		val input = args(0)
+	    		val input = i
 	    		println("This is my input: " + input)
 			    //println((splitExp(input)(0).mkString(" ")))
-			    //println((splitExp(input)(1).mkString(" ")))
 			    //println((splitExp(input)(2).mkString(" ")))
 			    var output_array = splitExp(input)
-			    var r = try {
-			   	//println(calculate(output_array) )
-			   	calculate(output_array)
-			    } catch {
-			        case _: NoSuchElementException => println("No element in stack")
-			    }
-			    println(r)
-	    	case _ => println("invalid token") //doesn't work for "4 &"
+			    var r = calculate(output_array) 
+
+			   	//println(calculate(output_array) )   
+			    //println(r)
+	    	case _ => println("too many elements in an array") //doesn't work for "4 &"
+	        }
 	    }
-	    
-	}
 
 	
 	def splitExp(a: String): Array[String] = {
@@ -33,9 +44,10 @@ object splitEXP {
 		return ss
 	}
 
-	def calculate(myArray: Array[String]): Int = {
+	def calculate(myArray: Array[String]): Option[Int] = {
 		var a = " ";
-		var ints = Stack[Int]() //how does this different from val ints = new Stack[Int]() why do we need the "new"?
+		var ints = Stack[Int]() //how does this different from val ints = new Stack[Int]() why do we need the "new"?(Scala is referring to the Stack's companion object apply method?)
+		try {
 		for (a <- myArray) {
 			 a match {
 				case "+" => {
@@ -62,34 +74,34 @@ object splitEXP {
 					val res = q / p
 					ints.push(res)
 				}
+				case IntValue(n) => ints.push(n)
+				case _ => return None //invalid token case
+				}
+				/*
 				case _ => {
 					try {
 					var b = a.toInt
 					//println("number: " + b)
 					ints.push(b)
 					} catch {
-					case _: NumberFormatException => {   //what if we do return 0  what does the return mean?
-					//	println("symbol: " + a)
+					case _: NumberFormatException => return None
 					}
 					}
 				}
-			}
-		}
-	// add guard to prevent too many operands	
-	ints match  {
-		case x if (x.length > 1) => 0 //why the return type is supposed to be int?
-		case _ => return(ints.pop)
-	}
-	/* why the line below didnt work
-	Option[Int] = ints match {
-		case x if (x.length > 1) => None
-		case _ => Some(ints.pop)
-	}
-	*/
+				*/
+			}// end of loop
+			Some(ints.pop)
+		    } catch {
+              //case x if (x.length > 1) => None //why the return type is supposed to be int?		    	
+              case _ : NoSuchElementException => None
+              //println("No element in stack")		    	
+              //case _ => return(Some(ints.pop))
+		    }
+
 	}
 }
 
-
+//}
 
 
 
